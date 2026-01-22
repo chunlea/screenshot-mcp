@@ -7,12 +7,12 @@ export async function getPlatform(): Promise<Platform> {
       return darwin;
     }
     case "win32": {
-      // TODO: Implement Windows support
-      throw new Error("Windows support not yet implemented");
+      const { win32 } = await import("./win32.ts");
+      return win32;
     }
     case "linux": {
-      // TODO: Implement Linux support
-      throw new Error("Linux support not yet implemented");
+      const { linux } = await import("./linux.ts");
+      return linux;
     }
     default:
       throw new Error(`Unsupported platform: ${process.platform}`);

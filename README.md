@@ -115,11 +115,12 @@ Capture a specific region.
 
 ## Platform Support
 
-| Platform | Status |
-|----------|--------|
-| macOS | Supported |
-| Windows | Planned |
-| Linux | Planned |
+| Platform | Status | Requirements |
+|----------|--------|--------------|
+| macOS | ✅ Supported | Screen Recording permission |
+| Windows | ✅ Supported | PowerShell (built-in) |
+| Linux (X11) | ✅ Supported | `xdotool` or `wmctrl` for windows, `gnome-screenshot`/`scrot`/`import` for capture |
+| Linux (Wayland) | ⚠️ Partial | GNOME Shell only, `grim` for screenshots |
 
 ## Configuration (Plugin Settings)
 
@@ -137,8 +138,34 @@ When this file exists, Claude will automatically use this directory for saving s
 
 ## Requirements
 
-- **macOS**: Requires Screen Recording permission (System Settings > Privacy & Security > Screen Recording)
 - **Runtime**: Bun v1.0+ or Node.js 18+
+
+### macOS
+- Screen Recording permission (System Settings > Privacy & Security > Screen Recording)
+
+### Windows
+- PowerShell (built-in, no extra installation needed)
+
+### Linux (X11)
+- Window listing: `xdotool` (recommended) or `wmctrl`
+- Screenshots: `gnome-screenshot`, `scrot`, or `import` (ImageMagick)
+- Display info: `xrandr`
+
+```bash
+# Ubuntu/Debian
+sudo apt install xdotool scrot
+
+# Fedora
+sudo dnf install xdotool scrot
+
+# Arch
+sudo pacman -S xdotool scrot
+```
+
+### Linux (Wayland)
+- Window listing: Only GNOME Shell supported (via gdbus)
+- Screenshots: `gnome-screenshot` or `grim`
+- Display info: `wlr-randr` or falls back to xrandr
 
 ## As Claude Code Plugin
 
