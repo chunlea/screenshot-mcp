@@ -1,0 +1,9 @@
+{
+  "name": "screenshot",
+  "version": "0.1.0",
+  "description": "Cross-platform screenshot capture for agent-based UI testing",
+  "author": {
+    "name": "Chunlea"
+  },
+  "keywords": ["screenshot", "ui-testing", "automation", "native-app"]
+}
