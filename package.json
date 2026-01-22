@@ -1,0 +1,23 @@
+{
+  "name": "screenshot-mcp",
+  "version": "0.1.0",
+  "description": "Cross-platform MCP server for capturing window/screen screenshots",
+  "module": "src/index.ts",
+  "type": "module",
+  "bin": {
+    "screenshot-mcp": "src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.3"
+  }
+}
