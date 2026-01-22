@@ -2,11 +2,35 @@
   "name": "screenshot-mcp",
   "version": "0.1.0",
   "description": "Cross-platform MCP server for capturing window/screen screenshots",
+  "author": "Chunlea <chunlea@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chunlea/screenshot-mcp.git"
+  },
+  "homepage": "https://github.com/chunlea/screenshot-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/chunlea/screenshot-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "screenshot",
+    "automation",
+    "ui-testing",
+    "native-app",
+    "claude",
+    "model-context-protocol"
+  ],
   "module": "src/index.ts",
   "type": "module",
   "bin": {
     "screenshot-mcp": "src/index.ts"
   },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun run --watch src/index.ts"

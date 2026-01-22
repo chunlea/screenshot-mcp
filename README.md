@@ -14,31 +14,46 @@ Also available as a **Claude Code plugin** with screenshot testing guidance.
 
 ## Installation
 
-```bash
-bun install
-```
+No installation required - use directly with `npx` or `bunx`.
 
 ## Usage
 
-### As MCP Server
-
-```bash
-bun run start
-```
-
 ### Configure in Claude Code
 
-Add to your MCP settings:
+Add to your MCP settings (`~/.claude/settings.json`):
 
 ```json
 {
   "mcpServers": {
     "screenshot": {
-      "command": "bun",
-      "args": ["run", "/path/to/screenshot-mcp/src/index.ts"]
+      "command": "bunx",
+      "args": ["screenshot-mcp"]
     }
   }
 }
+```
+
+Or with npx:
+
+```json
+{
+  "mcpServers": {
+    "screenshot": {
+      "command": "npx",
+      "args": ["-y", "screenshot-mcp"]
+    }
+  }
+}
+```
+
+### Run Standalone
+
+```bash
+# Using bunx (recommended)
+bunx screenshot-mcp
+
+# Using npx
+npx -y screenshot-mcp
 ```
 
 ## MCP Tools
@@ -123,13 +138,18 @@ When this file exists, Claude will automatically use this directory for saving s
 ## Requirements
 
 - **macOS**: Requires Screen Recording permission (System Settings > Privacy & Security > Screen Recording)
-- **Bun**: v1.0.0 or later
+- **Runtime**: Bun v1.0+ or Node.js 18+
 
 ## As Claude Code Plugin
 
 Install as a plugin to get the `screenshot-testing` skill:
 
 ```bash
+# Install from npm
+npm install -g screenshot-mcp
+claude plugin add screenshot-mcp
+
+# Or use local development
 claude --plugin-dir /path/to/screenshot-mcp
 ```
 
