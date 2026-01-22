@@ -1,16 +1,84 @@
 import { $ } from "bun";
 import { tmpdir } from "os";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 import type { Platform, WindowInfo, DisplayInfo } from "../types.ts";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const scriptsDir = join(__dirname, "scripts");
+const LIST_WINDOWS_SCRIPT = `
+ObjC.import("CoreGraphics");
+ObjC.import("Foundation");
+
+const kCGWindowListOptionOnScreenOnly = 1 << 0;
+const kCGWindowListExcludeDesktopElements = 1 << 4;
+
+const cfArray = $.CGWindowListCopyWindowInfo(
+  kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+  0
+);
+
+const count = $.CFArrayGetCount(cfArray);
+const result = [];
+
+for (let i = 0; i < count; i++) {
+  const dict = $.CFArrayGetValueAtIndex(cfArray, i);
+  const nsDict = ObjC.castRefToObject(dict);
+
+  const layer = nsDict.objectForKey("kCGWindowLayer");
+  if (!layer || layer.intValue !== 0) continue;
+
+  const owner = nsDict.objectForKey("kCGWindowOwnerName");
+  if (!owner) continue;
+
+  const name = nsDict.objectForKey("kCGWindowName");
+  const num = nsDict.objectForKey("kCGWindowNumber");
+  const bounds = nsDict.objectForKey("kCGWindowBounds");
+
+  result.push({
+    id: String(num.intValue),
+    title: name ? ObjC.unwrap(name) : "",
+    app: ObjC.unwrap(owner),
+    bounds: {
+      x: Math.round(bounds.objectForKey("X").doubleValue),
+      y: Math.round(bounds.objectForKey("Y").doubleValue),
+      width: Math.round(bounds.objectForKey("Width").doubleValue),
+      height: Math.round(bounds.objectForKey("Height").doubleValue)
+    }
+  });
+}
+
+JSON.stringify(result);
+`;
+
+const LIST_DISPLAYS_SCRIPT = `
+ObjC.import("AppKit");
+
+const screens = $.NSScreen.screens;
+const count = screens.count;
+const result = [];
+
+for (let i = 0; i < count; i++) {
+  const screen = screens.objectAtIndex(i);
+  const frame = screen.frame;
+  const name = ObjC.unwrap(screen.localizedName);
+
+  result.push({
+    id: i + 1,
+    name: name,
+    primary: i === 0,
+    bounds: {
+      x: Math.round(frame.origin.x),
+      y: Math.round(frame.origin.y),
+      width: Math.round(frame.size.width),
+      height: Math.round(frame.size.height)
+    }
+  });
+}
+
+JSON.stringify(result);
+`;
 
 async function listWindows(): Promise<WindowInfo[]> {
   try {
-    const scriptPath = join(scriptsDir, "list-windows.swift");
-    const result = await $`swift ${scriptPath}`.text();
+    const result = await $`osascript -l JavaScript -e ${LIST_WINDOWS_SCRIPT}`.text();
     return JSON.parse(result.trim());
   } catch {
     return [];
@@ -19,8 +87,7 @@ async function listWindows(): Promise<WindowInfo[]> {
 
 async function listDisplays(): Promise<DisplayInfo[]> {
   try {
-    const scriptPath = join(scriptsDir, "list-displays.swift");
-    const result = await $`swift ${scriptPath}`.text();
+    const result = await $`osascript -l JavaScript -e ${LIST_DISPLAYS_SCRIPT}`.text();
     return JSON.parse(result.trim());
   } catch {
     return [
