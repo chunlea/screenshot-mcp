@@ -1,111 +1,77 @@
----
-description: Use Bun instead of Node.js, npm, pnpm, or vite.
-globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
-alwaysApply: false
----
+# CLAUDE.md
 
-Default to using Bun instead of Node.js.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Use `bunx <package> <command>` instead of `npx <package> <command>`
-- Bun automatically loads .env, so don't use dotenv.
+## Project Overview
 
-## APIs
+screenshot-mcp is both an MCP (Model Context Protocol) server for capturing screenshots and a Claude Code plugin. It enables agents to automate UI testing of native applications by listing windows/displays and capturing screenshots.
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
+## Commands
 
-## Testing
+```bash
+# Install dependencies
+bun install
 
-Use `bun test` to run tests.
+# Run MCP server
+bun run start
 
-```ts#index.test.ts
-import { test, expect } from "bun:test";
+# Type check
+bunx tsc --noEmit
 
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+# Test as Claude Code plugin
+claude --plugin-dir /path/to/screenshot-mcp
 ```
 
-## Frontend
+## Architecture
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
+### MCP Server (src/)
 
-Server:
-
-```ts#index.ts
-import index from "./index.html"
-
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
+```
+src/
+├── index.ts              # MCP server entry, registers 5 tools
+├── types.ts              # TypeScript interfaces (Platform, WindowInfo, DisplayInfo, etc.)
+├── tools/                # Tool handlers (one file per tool)
+│   ├── list-windows.ts
+│   ├── list-displays.ts
+│   ├── screenshot-window.ts
+│   ├── screenshot-screen.ts
+│   └── screenshot-region.ts
+├── platform/
+│   ├── index.ts          # Platform detection, returns Platform interface
+│   └── darwin.ts         # macOS implementation using JXA (osascript)
+└── utils/
+    └── storage.ts        # Screenshot file saving with date-based organization
 ```
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+### Claude Code Plugin
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
+```
+.claude-plugin/plugin.json    # Plugin manifest
+.mcp.json                     # MCP server configuration
+skills/screenshot-testing/    # Screenshot testing guidance skill
 ```
 
-With the following `frontend.tsx`:
+### Platform Implementation Pattern
 
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
+Each platform implements the `Platform` interface from `src/types.ts`:
+- `listWindows()` - List visible windows with IDs
+- `listDisplays()` - List available displays
+- `screenshotWindow(windowId)` - Capture by window ID
+- `screenshotScreen(displayId?)` - Capture display
+- `screenshotRegion(x, y, width, height)` - Capture region
 
-// import .css files directly and it works
-import './index.css';
+macOS uses JXA (JavaScript for Automation) via `osascript -l JavaScript` to access CoreGraphics/AppKit APIs. Screenshots use the native `screencapture` command.
 
-const root = createRoot(document.body);
+To add Windows/Linux support, create `src/platform/win32.ts` or `src/platform/linux.ts` implementing the same interface.
 
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
+## Bun-Specific Notes
 
-root.render(<Frontend />);
-```
+- Use `bun` instead of `node`, `bun install` instead of `npm install`
+- Use `Bun.$` for shell commands (see darwin.ts)
+- Use `Bun.file()` for file operations
+- Bun automatically loads `.env` files
 
-Then, run index.ts
+## macOS Requirements
 
-```sh
-bun --hot ./index.ts
-```
-
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+- Screen Recording permission required (System Settings > Privacy & Security > Screen Recording)
+- Window IDs from `list_windows` are CGWindowIDs compatible with `screencapture -l`
