@@ -1,8 +1,8 @@
 {
   "name": "screenshot-mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Cross-platform MCP server for capturing window/screen screenshots",
-  "author": "Chunlea <chunlea@gmail.com>",
+  "author": "chunli <git@chunli.dev>",
   "license": "MIT",
   "repository": {
     "type": "git",
