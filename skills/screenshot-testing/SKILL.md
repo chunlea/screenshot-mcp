@@ -7,6 +7,27 @@ description: This skill should be used when the user asks to "test UI with scree
 
 A guide for conducting effective UI testing using screenshots. This skill covers the screenshot-mcp tools, testing workflows, and comparison strategies for native application testing.
 
+## Configuration
+
+Check for plugin settings at `.claude/screenshot.local.md` before taking screenshots.
+
+**Settings file format:**
+```markdown
+---
+default_save_dir: /path/to/screenshots
+---
+```
+
+When settings file exists:
+1. Read the file using the Read tool
+2. Parse YAML frontmatter to extract `default_save_dir`
+3. Use this path as `save_dir` when user wants to save screenshots
+4. If user specifies a different path, use their path instead
+
+When settings file does not exist:
+- Ask user if they want screenshots saved
+- If yes, ask for save location or suggest creating settings file
+
 ## Available MCP Tools
 
 The screenshot MCP server provides 5 tools:

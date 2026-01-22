@@ -2,6 +2,8 @@
 
 A cross-platform MCP (Model Context Protocol) server for capturing screenshots. Designed for agent-based native application testing.
 
+Also available as a **Claude Code plugin** with screenshot testing guidance.
+
 ## Features
 
 - **List Windows**: Get all visible windows with IDs, titles, and bounds
@@ -104,10 +106,38 @@ Capture a specific region.
 | Windows | Planned |
 | Linux | Planned |
 
+## Configuration (Plugin Settings)
+
+Create `.claude/screenshot.local.md` in your project to set a default save directory:
+
+```markdown
+---
+default_save_dir: /Users/yourname/Desktop/screenshots
+---
+```
+
+When this file exists, Claude will automatically use this directory for saving screenshots.
+
+**Note:** Add `.claude/*.local.md` to your `.gitignore`.
+
 ## Requirements
 
 - **macOS**: Requires Screen Recording permission (System Settings > Privacy & Security > Screen Recording)
 - **Bun**: v1.0.0 or later
+
+## As Claude Code Plugin
+
+Install as a plugin to get the `screenshot-testing` skill:
+
+```bash
+claude --plugin-dir /path/to/screenshot-mcp
+```
+
+The skill provides guidance on:
+- Effective screenshot testing workflows
+- Comparison testing strategies
+- Multi-display testing
+- Electron app testing examples
 
 ## License
 
